@@ -195,9 +195,10 @@
                 let _data = obj.data
                 if (_data.id < 1) return
                 let folder = $(obj.elem).parents('.layui-tree-spread').find('.layui-tree-txt:eq(0)').text()
+                if (isNaN(folder)) folder = '';
                 $('.layui-tree-entry').removeClass('layui-tree-entry-this')
                 $(obj.elem).find('.layui-tree-entry').addClass('layui-tree-entry-this')
-                let logPath = folder + '/' + (_data.title)
+                let logPath = (folder != '' ? folder + '/' : '') + (_data.title)
                 let file_path = logFolder + logPath
                 let localInfo = layui.sessionData(randomStr);
                 let localData = localInfo[module + '/' + logPath] || '';

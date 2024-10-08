@@ -117,19 +117,25 @@ class LogViewer extends Base
             });
             $logFiles        = array_values($logFiles);
             $logFilesLastKey = array_key_last($logFiles);
+            $_logs           = [];
             foreach ($logFiles as $key => $file) {
-                $glob = glob($logPath . $file . '/*');
-                array_map(function ($value) use ($logPath, $key, $file, $logFilesLastKey, &$_logs) {
-                    $arr                     = explode($logPath . $file, $value);
-                    $filename                = str_replace('/', '', $arr[1] ?? $value);
-                    $_logs[$file][$filename] = ['title' => $filename, 'id' => (int)$filename];
-                }, $glob);
+                if (is_array($file)) {
+                    $glob = glob($logPath . $file . '/*');
+                    array_map(function ($value) use ($logPath, $key, $file, $logFilesLastKey, &$_logs) {
+                        $arr                     = explode($logPath . $file, $value);
+                        $filename                = str_replace('/', '', $arr[1] ?? $value);
+                        $_logs[$file][$filename] = ['title' => $filename, 'id' => (int)$filename];
+                    }, $glob);
+                }else {
+                    $_logs[$name][] = ['title' => $file, 'id' => (int)$file];
+                }
+
             }
             cookie('phplogviewer-ThinkPHP-module', $name);
         }catch (\Throwable $exception) {
             $_logs = [];
         }
-        krsort($_logs);
+        if ($_logs) krsort($_logs);
         $logs     = [];
         $firstKey = array_key_first($_logs);
         foreach ($_logs as $key => $log) {
