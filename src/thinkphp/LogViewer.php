@@ -90,7 +90,7 @@ class LogViewer extends Base
         return $logs;
     }
 
-    public function fetch(): Response|string
+    public function fetch()
     {
         $viewBasePath = $this->getPluginBaseViewPath();
         $config       = [
