@@ -1,0 +1,288 @@
+<style>
+    .layui-layout-admin .layui-header {
+        border-bottom: 1px solid #f5f5f5;
+        box-sizing: border-box;
+        background-color: #fff;
+    }
+
+    .layui-layout-admin .layui-logo {
+        position: fixed;
+        top: 0;
+        height: 60px;
+        overflow: hidden;
+    }
+
+    .layui-side-menu .layui-nav > .layui-nav-item .layui-icon:first-child {
+        position: absolute;
+        top: 50%;
+        left: 20px;
+        margin-top: -19px;
+        color: #fff;
+    }
+
+    .layui-side-menu .layui-nav .layui-nav-item a {
+        padding-left: 45px;
+        padding-right: 30px;
+    }
+
+    .layui-nav {
+        color: #333;
+    }
+
+    .layui-side {
+        background-color: #2f363c !important;
+        z-index: 9999;
+    }
+
+    .layui-nav .layui-nav-item a {
+        color: #FFFFFF !important;
+    }
+
+    .layui-nav-tree .layui-nav-child dd.layui-this, .layui-nav-tree .layui-nav-child dd.layui-this a, .layui-nav-tree .layui-this, .layui-nav-tree .layui-this > a, .layui-nav-tree .layui-this > a:hover {
+        background: #ff4900;
+        color: #FFf !important;
+        border: 0;
+    }
+
+    .layui-nav .layui-nav-item a:hover, .layui-nav .layui-this a {
+        border-left-color: #ff4900 !important;
+    }
+
+    .log-body {
+        font-size: .92rem !important;
+    }
+
+    .log-code .layui-code-item {
+        font-family: sans-serif;
+        line-height: 2.5;
+    }
+
+    .log-code .layui-code-line-content {
+        font-family: sans-serif;
+        line-height: 2.5;
+        word-break: break-all;
+    }
+
+    .code-main {
+        top: 60px;
+    }
+
+    .log-module-select {
+        margin: 0 12px;
+    }
+
+    .layui-tree .layui-tree-emptyText {
+        margin: 15px 0;
+    }
+
+    .layui-tree .layui-tree-txt {
+        color: #FFFFFF;
+    }
+
+    .layui-tree .layui-tree-entry {
+        line-height: 35px;
+        height: 35px;
+        width: 100%;
+        background: #2f363c !important;
+    }
+
+    .layui-tree .layui-tree-entry.layui-tree-entry-this {
+        background: #7d7d7d !important;
+        border: 0;
+        border-radius: 1px;
+        width: 100%;
+    }
+
+    .layui-tree .layui-tree-entry:hover {
+        background: #7d7d7d !important;
+    }
+
+    .layui-elem-quote {
+        position: fixed;
+        z-index: 9999;
+        word-break: break-all;
+        margin-left: 15px;
+        width: 100%;
+    }
+
+    .toTop {
+        position: fixed;
+        right: 20px;
+        bottom: 35px;
+        width: 42px;
+        height: 42px;
+        line-height: 42px;
+        background: #333333;
+        border-radius: 50px;
+        border: 1px solid #6d6d6d;
+        text-align: center;
+        font-size: 1rem;
+        z-index: 9999;
+        cursor: pointer;
+    }
+
+    .toTop .layui-icon {
+        font-size: 30px;
+        color: #FFFFFF;
+    }
+</style>
+
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header">
+        <ul class="layui-nav layui-layout-left ">
+            <li class="layui-nav-item layui-show-xs-inline-block" lay-on="menuLeft">
+                <i class="layui-icon layui-icon-spread-left"></i>
+            </li>
+        </ul>
+    </div>
+
+    <div class="layui-side layui-side-menu layui-bg-black">
+        <div class="layui-logo layui-bg-black">ThinkPHP 日志查看器</div>
+
+        <div class="layui-form log-module-select layui-hide-xs">
+            <select lay-filter="module">
+                <option value="log">默认【log】日志</option>
+                {volist name='modules' id='vo'}
+
+                <option value="{$vo}" {if $module==$vo}selected{/if}>模块【{$vo}】日志</option>
+                {/volist}
+
+            </select>
+        </div>
+
+        <div class="layui-side-scroll">
+            <div id="menu"></div>
+        </div>
+    </div>
+    <div class="layui-body">
+        <blockquote class="layui-elem-quote layui-text">
+            <span class="now-log-path">暂无日志内容，请选择日志文件</span>
+        </blockquote>
+        <div class="layui-main code-main">
+            <pre class="layui-code log-body layui-hide" lay-options="{}"></pre>
+        </div>
+    </div>
+    <div class="toTop" lay-on="toTop">
+        <i class="layui-icon layui-icon-up"></i>
+    </div>
+</div>
+
+<script>
+
+    var logFolder = '{$logPath|default=""}'
+    let randomStr = '{$randomStr|default=""}'
+    let todayLog = '{:date("Ym/d")}.log'
+    var module = '{$module|default="log"}'
+    var isShow = true
+
+    layui.use(['element', 'layer', 'util'], function () {
+
+        let element = layui.element;
+        let layer = layui.layer;
+        let util = layui.util;
+        let $ = layui.$;
+        let tree = layui.tree;
+        let form = layui.form;
+
+        let treeData = JSON.parse('{$logs|json_encode=256|raw}');
+        tree.render({
+            id: 'menu',
+            elem: '#menu',
+            data: treeData,
+            showLine: false,
+            accordion: true,
+            click: (obj) => {
+                let _data = obj.data
+                if (_data.id < 1) return
+                let folder = $(obj.elem).parents('.layui-tree-spread').find('.layui-tree-txt:eq(0)').text()
+                $('.layui-tree-entry').removeClass('layui-tree-entry-this')
+                $(obj.elem).find('.layui-tree-entry').addClass('layui-tree-entry-this')
+                let logPath = folder + '/' + (_data.title)
+                let file_path = logFolder + logPath
+                let localInfo = layui.sessionData(randomStr);
+                let localData = localInfo[module + '/' + logPath] || '';
+                $('.now-log-path').text(' 当前项目日志路径：' + file_path)
+                $('.log-body').removeClass('layui-hide')
+                if (localData != '') {
+                    layui.code({
+                        elem: '.log-body', code: localData.join(''), className: 'log-code', langMarker: true, header: true, theme: 'dark',
+                        done: function () {
+                            setTimeout(() => window.scrollTo(0, document.body.scrollHeight), 20)
+                        }
+                    });
+                } else {
+                    ajaxPost(location.href, {'logviewer_file_path': file_path}, function (res) {
+                        let info = res.data?.info || ''
+                        if (logPath != todayLog) {
+                            try {
+                                layui.sessionData(randomStr, {key: module + '/' + logPath, value: info});
+                            } catch (e) {
+                                console.error(e)
+                            }
+                        }
+                        layui.code({
+                            elem: '.log-body', code: info.join(''), className: 'log-code', langMarker: true, header: true, theme: 'dark',
+                            done: function () {
+                                setTimeout(() => window.scrollTo(0, document.body.scrollHeight), 20)
+                            }
+                        });
+                    })
+                }
+            }
+        });
+
+        form.on('select(module)', function (data) {
+            $('.now-log-path').text('暂无日志内容，请选择日志文件')
+            $('.log-body').addClass('layui-hide')
+            let value = data.value
+            if (value != '') {
+                document.cookie = "phplogviewer-ThinkPHP-module=" + value;
+                module = value
+                ajaxPost(location.href, {'logviewer_module': value}, function (res) {
+                    let list = res.data?.list || ''
+                    logFolder = list?.logPath || ''
+                    let treeData = list?.logs || {}
+                    tree.reload('menu', {data: treeData});
+                })
+            }
+        })
+
+        util.on({
+            toTop: function () {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                })
+            },
+            menuLeft: function (othis) {
+                if (isShow) {
+                    $('.layui-side.layui-bg-black').width(60); //设置宽度
+                    $('.layui-logo').width(60);
+                    $('.layui-layout-left').css('left', 60 + 'px');
+                    $('.layui-body').css('left', 60 + 'px');
+                    $('.layui-footer').css('left', 60 + 'px');
+                    isShow = false;
+                } else {
+                    $('.layui-side.layui-bg-black').width(200);
+                    $('.layui-logo').width(200);
+                    $('.layui-layout-left').css('left', 200 + 'px');
+                    $('.layui-body').css('left', 200 + 'px');
+                    $('.layui-footer').css('left', 200 + 'px');
+                    isShow = true;
+                }
+            },
+        });
+
+        function ajaxPost(url, data, callback) {
+            let load = layer.msg('数据获取中...', {icon: 16, time: 30000, shade: 0.3, shadeClose: false, scrollbar: false})
+            $.ajax({
+                method: 'POST', url: url, dataType: 'json', timeout: 5000, data: data,
+                success: (res) => callback(res),
+                error: (error) => layer.alert(error.responseJSON?.message || '未知错误', {shade: 0.3, shadeClose: true, time: 7000, icon: 0}),
+                complete: () => layer.close(load),
+            })
+        }
+
+    });
+
+</script>

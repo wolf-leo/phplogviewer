@@ -3,12 +3,12 @@
     "description": "php框架日志查看器",
     "type": "library",
     "require": {
-        "php": ">7.3"
+        "php": ">=7.3"
     },
     "license": "Apache-2.0",
     "autoload": {
         "psr-4": {
-            "WolfLeo\\Phplogviewer\\": "src/"
+            "Wolfcode\\PhpLogviewer\\": "src/"
         }
     },
     "authors": [
