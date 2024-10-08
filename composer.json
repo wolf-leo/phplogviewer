@@ -3,7 +3,7 @@
     "description": "php框架日志查看器",
     "type": "library",
     "require": {
-        "php": ">=7.3"
+        "php": ">=7.4"
     },
     "license": "Apache-2.0",
     "autoload": {
