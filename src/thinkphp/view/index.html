@@ -10,6 +10,14 @@
         top: 0;
         height: 60px;
         overflow: hidden;
+        cursor: pointer;
+    }
+
+    .layui-layout-admin .log-module-select {
+        position: fixed;
+        top: 60px;
+        width: 175px;
+        z-index: 9999;
     }
 
     .layui-side-menu .layui-nav > .layui-nav-item .layui-icon:first-child {
@@ -64,11 +72,18 @@
     }
 
     .code-main {
+        height: 94%;
         top: 60px;
+        overflow: hidden;
+        overflow-y: scroll;
     }
 
     .log-module-select {
         margin: 0 12px;
+    }
+
+    .layui-tree {
+        margin-top: 50px;
     }
 
     .layui-tree .layui-tree-emptyText {
@@ -137,8 +152,7 @@
     </div>
 
     <div class="layui-side layui-side-menu layui-bg-black">
-        <div class="layui-logo layui-bg-black">ThinkPHP 日志查看器</div>
-
+        <div class="layui-logo layui-bg-black" lay-on="reloaPage">ThinkPHP 日志查看器</div>
         <div class="layui-form log-module-select layui-hide-xs">
             <select lay-filter="module">
                 <option value="log">默认【log】日志</option>
@@ -205,10 +219,12 @@
                 $('.now-log-path').text(' 当前项目日志路径：' + file_path)
                 $('.log-body').removeClass('layui-hide')
                 if (localData != '') {
+                    let load = layer.msg('数据获取中...', {icon: 16, time: 30000, shade: 0.3, shadeClose: false, scrollbar: false})
                     layui.code({
                         elem: '.log-body', code: localData.join(''), className: 'log-code', langMarker: true, header: true, theme: 'dark',
                         done: function () {
-                            setTimeout(() => window.scrollTo(0, document.body.scrollHeight), 20)
+                            layer.close(load)
+                            $(".code-main").animate({scrollTop: document.body.scrollHeight}, 200)
                         }
                     });
                 } else {
@@ -224,7 +240,7 @@
                         layui.code({
                             elem: '.log-body', code: info.join(''), className: 'log-code', langMarker: true, header: true, theme: 'dark',
                             done: function () {
-                                setTimeout(() => window.scrollTo(0, document.body.scrollHeight), 20)
+                                $(".code-main").animate({scrollTop: document.body.scrollHeight}, 200)
                             }
                         });
                     })
@@ -249,16 +265,17 @@
         })
 
         util.on({
+            reloaPage: function () {
+                location.reload()
+            },
             toTop: function () {
-                window.scrollTo({
-                    top: 0,
-                    behavior: 'smooth'
-                })
+                $(".code-main").animate({scrollTop: 0}, 100);
             },
             menuLeft: function (othis) {
                 if (isShow) {
                     $('.layui-side.layui-bg-black').width(60); //设置宽度
                     $('.layui-logo').width(60);
+                    $('.log-module-select').width(30);
                     $('.layui-layout-left').css('left', 60 + 'px');
                     $('.layui-body').css('left', 60 + 'px');
                     $('.layui-footer').css('left', 60 + 'px');
@@ -266,6 +283,7 @@
                 } else {
                     $('.layui-side.layui-bg-black').width(200);
                     $('.layui-logo').width(200);
+                    $('.log-module-select').width(175);
                     $('.layui-layout-left').css('left', 200 + 'px');
                     $('.layui-body').css('left', 200 + 'px');
                     $('.layui-footer').css('left', 200 + 'px');
