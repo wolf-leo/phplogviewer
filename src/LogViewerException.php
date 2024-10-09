@@ -2,7 +2,7 @@
 
 namespace Wolfcode\PhpLogviewer;
 
-use think\Exception;
+use \Exception;
 
 class LogViewerException extends Exception
 {
