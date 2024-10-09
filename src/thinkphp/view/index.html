@@ -99,17 +99,28 @@
         height: 35px;
         width: 100%;
         background: #2f363c !important;
+        user-select: none;
     }
 
     .layui-tree .layui-tree-entry.layui-tree-entry-this {
-        background: #7d7d7d !important;
+        background: #FFFFFF !important;
         border: 0;
         border-radius: 1px;
         width: 100%;
     }
 
+    .layui-tree .layui-tree-entry.layui-tree-entry-this .layui-tree-txt {
+        color: #2f363c !important;
+    }
+
     .layui-tree .layui-tree-entry:hover {
-        background: #7d7d7d !important;
+        background: #FFFFFF !important;
+        color: #2f363c !important;
+    }
+
+    .layui-tree .layui-tree-entry:hover .layui-tree-txt {
+        background: transparent !important;
+        color: #2f363c !important;
     }
 
     .layui-elem-quote {
@@ -183,6 +194,8 @@
 
 <script>
 
+    let firstLoad = layer.load(2, {time: 30000, shade: 0.3, shadeClose: true, scrollbar: false})
+
     var logFolder = '{$logPath|default=""}'
     let randomStr = '{$randomStr|default=""}'
     let todayLog = '{:date("Ym/d")}.log'
@@ -197,6 +210,10 @@
         let $ = layui.$;
         let tree = layui.tree;
         let form = layui.form;
+
+        $(function () {
+            layer.close(firstLoad)
+        })
 
         let treeData = JSON.parse('{$logs|json_encode=256|raw}');
         tree.render({
@@ -224,7 +241,7 @@
                         elem: '.log-body', code: localData.join(''), className: 'log-code', langMarker: true, header: true, theme: 'dark',
                         done: function () {
                             layer.close(load)
-                            $(".code-main").animate({scrollTop: document.body.scrollHeight}, 200)
+                            $('.code-main').animate({scrollTop: $('.code-main').prop('scrollHeight')}, 200)
                         }
                     });
                 } else {
@@ -240,7 +257,7 @@
                         layui.code({
                             elem: '.log-body', code: info.join(''), className: 'log-code', langMarker: true, header: true, theme: 'dark',
                             done: function () {
-                                $(".code-main").animate({scrollTop: document.body.scrollHeight}, 200)
+                                $('.code-main').animate({scrollTop: $('.code-main').prop('scrollHeight')}, 200)
                             }
                         });
                     })

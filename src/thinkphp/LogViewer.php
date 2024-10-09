@@ -15,16 +15,19 @@ use Wolfcode\PhpLogviewer\LogViewerException;
 
 class LogViewer extends Base
 {
+    protected array $config;
+
     protected function initialize()
     {
-        $randomStr  = $this->randomStr();
-        $module     = cookie('phplogviewer-ThinkPHP-module');
-        $moduleLogs = $this->getModuleLogs($module);
-        $logPath    = $moduleLogs['logPath'] ?? '';
-        $logPath    = addslashes($logPath);
-        $logs       = $moduleLogs['logs'] ?? [];
-        $modules    = config('logviewer.modules') ?: ['home', 'admin', 'index', 'api'];
-        View::assign(compact('logs', 'modules', 'logPath', 'randomStr', 'module'));
+        $randomStr    = $this->randomStr();
+        $module       = cookie('phplogviewer-ThinkPHP-module');
+        $moduleLogs   = $this->getModuleLogs($module);
+        $logPath      = $moduleLogs['logPath'] ?? '';
+        $logPath      = addslashes($logPath);
+        $logs         = $moduleLogs['logs'] ?? [];
+        $this->config = $config = config('logviewer');
+        $modules      = $config['modules'] ?? ['home', 'admin', 'index', 'api'];
+        View::assign(compact('logs', 'modules', 'logPath', 'randomStr', 'module', 'config'));
     }
 
     protected function randomStr(): string
@@ -35,7 +38,7 @@ class LogViewer extends Base
             $randomStr = Str::random(16);
             @touch($_path);
             @file_put_contents($_path, $randomStr);
-        } else {
+        }else {
             $randomStr = cookie('phplogviewer-ThinkPHP', '');
             if (empty($randomStr)) {
                 $randomStr = file_get_contents($_path);
@@ -67,7 +70,7 @@ class LogViewer extends Base
                     if (empty($file)) return ['code' => 0, 'msg' => '文件不能为空'];
                     try {
                         $info = $this->getFileLogs($file);
-                    } catch (\Throwable $exception) {
+                    }catch (\Throwable $exception) {
                         return ['code' => 0, 'msg' => $exception->getMessage()];
                     }
                     return ['code' => 1, 'data' => compact('info')];
@@ -93,18 +96,17 @@ class LogViewer extends Base
     public function fetch()
     {
         $viewBasePath = $this->getPluginBaseViewPath();
-        $config       = [
+        View::config([
             'view_dir_name' => '',
             'view_path'     => root_path() . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR
-        ];
-        View::config($config);
+        ]);
         View::engine()->layout($viewBasePath . 'layout');
         return View::fetch($viewBasePath . 'index');
     }
 
     protected function getModuleLogs(?string $name): array
     {
-        $name     = $name ?: config('logviewer.default_module', 'log');
+        $name     = $name ?: ($this->config['default_module'] ?? 'log');
         $basePath = root_path() . 'runtime' . DIRECTORY_SEPARATOR;
         $logPath  = $basePath . $name . DIRECTORY_SEPARATOR;
         if (file_exists($basePath . $name . DIRECTORY_SEPARATOR . 'log')) {
@@ -126,13 +128,13 @@ class LogViewer extends Base
                         $filename                = str_replace('/', '', $arr[1] ?? $value);
                         $_logs[$file][$filename] = ['title' => $filename, 'id' => (int)$filename];
                     }, $glob);
-                } else {
+                }else {
                     $_logs[$name][] = ['title' => $file, 'id' => (int)$file];
                 }
 
             }
             cookie('phplogviewer-ThinkPHP-module', $name);
-        } catch (\Throwable $exception) {
+        }catch (\Throwable $exception) {
             $_logs = [];
         }
         if ($_logs) krsort($_logs);
