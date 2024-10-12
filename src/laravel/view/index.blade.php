@@ -205,7 +205,7 @@
 
     var logFolder = '{{$logPath}}'
     let randomStr = '{{$randomStr}}'
-    let todayLog = '{{date("Ym/d")}}.log'
+    let todayLog = 'laravel-{{date("Y-m-d")}}.log'
     var module = '{{$module}}'
     var isShow = true
 
@@ -234,8 +234,8 @@
                 if (_data.id < 1) return
                 $('.layui-tree-entry').removeClass('layui-tree-entry-this')
                 $(obj.elem).find('.layui-tree-entry').addClass('layui-tree-entry-this')
-                let logPath = '/' + (_data.title)
-                let file_path = logFolder + logPath
+                let logPath = _data.title
+                let file_path = logFolder + '/' + logPath
                 let localInfo = layui.sessionData(randomStr);
                 let localData = localInfo[module + '/' + logPath] || '';
                 $('.now-log-path').text(' 当前项目日志路径：' + file_path)
@@ -254,7 +254,7 @@
                         let info = res.data?.info || ''
                         if (logPath != todayLog) {
                             try {
-                                layui.sessionData(randomStr, {key: module + '/' + logPath, value: info});
+                                layui.sessionData(randomStr, {key: logPath, value: info});
                             } catch (e) {
                                 console.error(e)
                             }

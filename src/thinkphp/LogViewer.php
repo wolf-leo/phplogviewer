@@ -3,7 +3,6 @@
 namespace Wolfcode\PhpLogviewer\thinkphp;
 
 use think\exception\ErrorException;
-use think\facade\Cache;
 use think\facade\Log;
 use think\facade\View;
 use think\helper\Str;
@@ -44,12 +43,6 @@ class LogViewer extends Base
                 $randomStr = file_get_contents($_path);
                 cookie('phplogviewer-ThinkPHP', $randomStr);
             }
-        }
-        if (\request()->isAjax()) {
-            $result = $this->postData(request());
-            $code   = $result['code'] ?? 0;
-            if ($code < 1) throw new LogViewerException($result['msg'] ?? '', 0);
-            exit(json_encode(['code' => 1, 'data' => $result['data'] ?? []], JSON_UNESCAPED_UNICODE));
         }
         return $randomStr;
     }
@@ -95,6 +88,12 @@ class LogViewer extends Base
 
     public function fetch()
     {
+        if (\request()->isAjax()) {
+            $result = $this->postData(request());
+            $code   = $result['code'] ?? 0;
+            if ($code < 1) return json(['code' => 0, 'msg' => $result['msg'] ?? '']);
+            return json(['code' => 1, 'data' => $result['data'] ?? []]);
+        }
         $viewBasePath = $this->getPluginBaseViewPath();
         View::config([
             'view_dir_name' => '',
