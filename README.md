@@ -1,6 +1,6 @@
 # PHP日志查看器
 
-> 目前只支持Laravel、ThinkPHP6+、ThinkPHP8+
+> 目前只支持Laravel、ThinkPHP6+、ThinkPHP8+、webman
 > 要求 `php >= 7.4`
 
 ## 使用方法
