@@ -31,6 +31,24 @@ composer require wolf-leo/phplogviewer
     }
 ```
 
+### webman 框架中
+
+```php
+    // 如果项目中采用 laravel 组件
+    public function test()
+    {
+        return (new \Wolfcode\PhpLogviewer\webman\laravel\LogViewer())->fetch();
+    }
+```
+
+```php
+    // 如果项目中采用 thinkphp 组件
+    public function test()
+    {
+        return (new \Wolfcode\PhpLogviewer\webman\thinkphp\LogViewer())->fetch();
+    }
+```
+
 > 可自定义配置
 >
 > 在 `config` 下新建 `logviewer.php` 文件
