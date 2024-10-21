@@ -205,7 +205,7 @@
 
     var logFolder = '{{$logPath}}'
     let randomStr = '{{$randomStr}}'
-    let todayLog = '{{date("Y-m-d")}}.log'
+    let todayLog = 'webman-{{date("Y-m-d")}}.log'
     var module = '{{$module}}'
     var isShow = true
 
