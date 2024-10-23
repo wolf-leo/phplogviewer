@@ -1,6 +1,6 @@
 <?php
 
-namespace Wolfcode\phpLogViewer;
+namespace Wolfcode\PhpLogviewer;
 
 abstract class Base
 {
