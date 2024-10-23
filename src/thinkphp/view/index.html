@@ -20,14 +20,6 @@
         z-index: 9999;
     }
 
-    .layui-side-menu .layui-nav > .layui-nav-item .layui-icon:first-child {
-        position: absolute;
-        top: 50%;
-        left: 20px;
-        margin-top: -19px;
-        color: #fff;
-    }
-
     .layui-side-menu .layui-nav .layui-nav-item a {
         padding-left: 45px;
         padding-right: 30px;
@@ -37,18 +29,18 @@
         color: #333;
     }
 
+    .layui-nav a {
+        padding-left: 20px !important;
+    }
+
     .layui-side {
         background-color: #2f363c !important;
         z-index: 9999;
     }
 
-    .layui-nav .layui-nav-item a {
-        color: #FFFFFF !important;
-    }
-
     .layui-nav-tree .layui-nav-child dd.layui-this, .layui-nav-tree .layui-nav-child dd.layui-this a, .layui-nav-tree .layui-this, .layui-nav-tree .layui-this > a, .layui-nav-tree .layui-this > a:hover {
-        background: #ff4900;
-        color: #FFf !important;
+        background: #FFFFFF;
+        color: #333333 !important;
         border: 0;
     }
 
@@ -82,45 +74,17 @@
         margin: 0 12px;
     }
 
-    .layui-tree {
+    .tree-nav {
         margin-top: 50px;
+        z-index: 99
     }
 
-    .layui-tree .layui-tree-emptyText {
+    .tree-nav .layui-tree-emptyText {
         margin: 15px 0;
     }
 
-    .layui-tree .layui-tree-txt {
+    .tree-nav .layui-tree-txt {
         color: #FFFFFF;
-    }
-
-    .layui-tree .layui-tree-entry {
-        line-height: 35px;
-        height: 35px;
-        width: 100%;
-        background: #2f363c !important;
-        user-select: none;
-    }
-
-    .layui-tree .layui-tree-entry.layui-tree-entry-this {
-        background: #FFFFFF !important;
-        border: 0;
-        border-radius: 1px;
-        width: 100%;
-    }
-
-    .layui-tree .layui-tree-entry.layui-tree-entry-this .layui-tree-txt {
-        color: #2f363c !important;
-    }
-
-    .layui-tree .layui-tree-entry:hover {
-        background: #FFFFFF !important;
-        color: #2f363c !important;
-    }
-
-    .layui-tree .layui-tree-entry:hover .layui-tree-txt {
-        background: transparent !important;
-        color: #2f363c !important;
     }
 
     .layui-elem-quote {
@@ -162,7 +126,7 @@
         </ul>
     </div>
 
-    <div class="layui-side layui-side-menu layui-bg-black">
+    <div class="layui-side layui-side-menu">
         <div class="layui-logo layui-bg-black" lay-on="reloaPage">{$config.title|default='ThinkPHP 日志查看器'}</div>
         <div class="layui-form log-module-select">
             <select lay-filter="module">
@@ -175,9 +139,13 @@
             </select>
         </div>
 
-        <div class="layui-side-scroll">
-            <div id="menu"></div>
+        <div class="layui-side tree-nav">
+            <div class="layui-side-scroll">
+                <ul class="layui-nav layui-nav-tree" id="nav" layui-filter="nav">
+                </ul>
+            </div>
         </div>
+
     </div>
     <div class="layui-body">
         <blockquote class="layui-elem-quote layui-text">
@@ -215,21 +183,61 @@
             layer.close(firstLoad)
         })
 
-        let treeData = JSON.parse('{$logs|json_encode=256|raw}');
-        tree.render({
-            id: 'menu',
-            elem: '#menu',
-            data: treeData,
-            showLine: false,
-            accordion: true,
-            click: (obj) => {
-                let _data = obj.data
-                if (_data.id < 1) return
-                let folder = $(obj.elem).parents('.layui-tree-spread').find('.layui-tree-txt:eq(0)').text()
+        let logsData = JSON.parse('{$logs|json_encode=256|raw}');
+
+        renderMenu(logsData)
+
+        $('.layui-nav-tree').on('click', 'li', function () {
+            if ($(this).hasClass('layui-nav-itemed')) {
+                $(this).addClass('layui-nav-itemed').siblings('li').removeClass('layui-nav-itemed')
+            }
+        })
+
+        form.on('select(module)', function (data) {
+            $('.now-log-path').text('暂无日志内容，请选择日志文件')
+            $('.log-body').addClass('layui-hide')
+            let value = data.value
+            if (value != '') {
+                document.cookie = "phplogviewer-ThinkPHP-module=" + value;
+                module = value
+                ajaxPost(location.href, {'logviewer_module': value}, function (res) {
+                    let list = res.data?.list || ''
+                    logFolder = list?.logPath || ''
+                    renderMenu(list?.logs || {})
+                })
+            }
+        })
+
+        util.on({
+            reloaPage: function () {
+                location.reload()
+            },
+            toTop: function () {
+                $(".code-main").animate({scrollTop: 0}, 100);
+            },
+            menuLeft: function (othis) {
+                if (isShow) {
+                    $('.layui-side.layui-bg-black').width(60); //设置宽度
+                    $('.layui-logo').width(60);
+                    $('.log-module-select').width(30);
+                    $('.layui-layout-left').css('left', 60 + 'px');
+                    $('.layui-body').css('left', 60 + 'px');
+                    $('.layui-footer').css('left', 60 + 'px');
+                    isShow = false;
+                } else {
+                    $('.layui-side.layui-bg-black').width(200);
+                    $('.layui-logo').width(200);
+                    $('.log-module-select').width(175);
+                    $('.layui-layout-left').css('left', 200 + 'px');
+                    $('.layui-body').css('left', 200 + 'px');
+                    $('.layui-footer').css('left', 200 + 'px');
+                    isShow = true;
+                }
+            },
+            logClick: function () {
+                let folder = $(this).parents('.layui-nav-itemed').find('a:eq(0)').text()
                 if (isNaN(folder)) folder = '';
-                $('.layui-tree-entry').removeClass('layui-tree-entry-this')
-                $(obj.elem).find('.layui-tree-entry').addClass('layui-tree-entry-this')
-                let logPath = (folder != '' ? folder + '/' : '') + (_data.title)
+                let logPath = (folder != '' ? folder + '/' : '') + ($(this).text())
                 let file_path = logFolder + logPath
                 let localInfo = layui.sessionData(randomStr);
                 let localData = localInfo[module + '/' + logPath] || '';
@@ -265,49 +273,31 @@
             }
         });
 
-        form.on('select(module)', function (data) {
-            $('.now-log-path').text('暂无日志内容，请选择日志文件')
-            $('.log-body').addClass('layui-hide')
-            let value = data.value
-            if (value != '') {
-                document.cookie = "phplogviewer-ThinkPHP-module=" + value;
-                module = value
-                ajaxPost(location.href, {'logviewer_module': value}, function (res) {
-                    let list = res.data?.list || ''
-                    logFolder = list?.logPath || ''
-                    let treeData = list?.logs || {}
-                    tree.reload('menu', {data: treeData});
-                })
+        function renderMenu(logsData) {
+            $('#nav').empty()
+            let _html = ``
+            if (logsData.length < 1) {
+                _html += `<div class="layui-tree-emptyText">暂无数据</div>`
+                $('#nav').append(_html)
+                return
             }
-        })
-
-        util.on({
-            reloaPage: function () {
-                location.reload()
-            },
-            toTop: function () {
-                $(".code-main").animate({scrollTop: 0}, 100);
-            },
-            menuLeft: function (othis) {
-                if (isShow) {
-                    $('.layui-side.layui-bg-black').width(60); //设置宽度
-                    $('.layui-logo').width(60);
-                    $('.log-module-select').width(30);
-                    $('.layui-layout-left').css('left', 60 + 'px');
-                    $('.layui-body').css('left', 60 + 'px');
-                    $('.layui-footer').css('left', 60 + 'px');
-                    isShow = false;
-                } else {
-                    $('.layui-side.layui-bg-black').width(200);
-                    $('.layui-logo').width(200);
-                    $('.log-module-select').width(175);
-                    $('.layui-layout-left').css('left', 200 + 'px');
-                    $('.layui-body').css('left', 200 + 'px');
-                    $('.layui-footer').css('left', 200 + 'px');
-                    isShow = true;
+            $.each(logsData, function (index, value) {
+                let _open = ''
+                let children = value.children
+                if (index < 1) _open = 'layui-nav-itemed'
+                _html += `<li class="layui-nav-item ${_open}"><a class="" href="javascript:;">${value.title}</a><dl class="layui-nav-child">`
+                if (children.length > 0) {
+                    $.each(children, function (idx, val) {
+                        _html += `<dd><a href="javascript:;" lay-on="logClick">${val.title}</a></dd>`
+                    })
                 }
-            },
-        });
+                _html += `</dl></li>`
+            })
+            $('#nav').append(_html)
+            let layFilter = $("#nav").attr('lay-filter');
+            layui.element.render('nav', layFilter);
+
+        }
 
         function ajaxPost(url, data, callback) {
             let load = layer.msg('数据获取中...', {icon: 16, time: 30000, shade: 0.3, shadeClose: false, scrollbar: false})
