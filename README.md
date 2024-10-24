@@ -1,6 +1,6 @@
 # PHP日志查看器
 
-> 目前只支持Laravel、ThinkPHP6+、ThinkPHP8+、webman
+> 目前只支持Laravel、ThinkPHP5+、ThinkPHP6+、ThinkPHP8+、webman
 > 要求 `php >= 7.4`
 
 ## 使用方法
@@ -19,6 +19,12 @@ composer require wolf-leo/phplogviewer
     public function test()
     {
         return (new \Wolfcode\PhpLogviewer\thinkphp\LogViewer())->fetch();
+    }
+    
+    // Version in ThinkPHP 5.X
+    public function test()
+    {
+        return (new \Wolfcode\PhpLogviewer\thinkphp\LogViewerOld())->fetch();
     }
 ```
 
