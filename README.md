@@ -61,6 +61,7 @@ composer require wolf-leo/phplogviewer
 
 ```php
 <?php
+
 return [
 
     // 日志标题
@@ -81,6 +82,14 @@ return [
     'layui_css_path' => '',
     // layui js 路径 如不设置，将默认调用公共CDN资源
     'layui_js_path'  => '',
+    
+    // 自定义属性
+    'customize'      => [
+        // css 可以修改页面相关样式
+        'css' => '/static/xxx/xxx.css',
+        // js 可以控制页面相关属性
+        'js'  => '/static/xxx/xxx.js',
+    ],
     
 ];
 ```

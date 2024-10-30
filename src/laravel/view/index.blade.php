@@ -8,6 +8,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="{{$config['layui_css_path']??'//unpkg.com/layui/dist/css/layui.css'}}" rel="stylesheet">
     <script src="{{$config['layui_js_path']??'//unpkg.com/layui/dist/layui.js'}}"></script>
+
+    @if (!empty($config['customize']['css']))
+        <link href="{{$config['customize']['css']}}" rel="stylesheet">
+    @endif
+    @if (!empty($config['customize']['js']))
+        <script src="{{$config['customize']['js']}}"></script>
+    @endif
+
 </head>
 <body>
 
@@ -222,7 +230,7 @@
             },
             menuLeft: function (othis) {
                 if (isShow) {
-                    $('.layui-side.layui-bg-black').width(60); //设置宽度
+                    $('.layui-side').width(60); //设置宽度
                     $('.layui-logo').width(60);
                     $('.log-module-select').width(30);
                     $('.layui-layout-left').css('left', 60 + 'px');
@@ -230,7 +238,7 @@
                     $('.layui-footer').css('left', 60 + 'px');
                     isShow = false;
                 } else {
-                    $('.layui-side.layui-bg-black').width(200);
+                    $('.layui-side').width(200);
                     $('.layui-logo').width(200);
                     $('.log-module-select').width(175);
                     $('.layui-layout-left').css('left', 200 + 'px');
@@ -293,7 +301,7 @@
                 _html += `<li class="layui-nav-item ${_open}"><a class="" href="javascript:;">${value.title}</a><dl class="layui-nav-child">`
                 if (children.length > 0) {
                     $.each(children, function (idx, val) {
-                        _html += `<dd><a href="javascript:;" lay-on="logClick">${val.title}</a></dd>`
+                        _html += `<dd><a href="javascript:;" lay-on="logClick" title="${val.title}">${val.title}</a></dd>`
                     })
                 }
                 _html += `</dl></li>`
