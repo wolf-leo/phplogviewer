@@ -236,7 +236,7 @@
             },
             logClick: function () {
                 let folder = $(this).parents('.layui-nav-itemed').find('a:eq(0)').text()
-                if (isNaN(folder)) folder = '';
+                // if (isNaN(folder)) folder = '';
                 let logPath = (folder != '' ? folder + '/' : '') + ($(this).text())
                 let file_path = logFolder + logPath
                 let localInfo = layui.sessionData(randomStr);
