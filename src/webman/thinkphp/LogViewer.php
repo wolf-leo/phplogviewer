@@ -57,7 +57,7 @@ class LogViewer extends Base
         foreach ($params as $key => $param) {
             if (empty($param)) continue;
             switch ($key) {
-                case 'logviewer_file_path';
+                case 'logviewer_file_path':
                     $file = $params['logviewer_file_path'] ?? '';
                     if (empty($file)) return ['code' => 0, 'msg' => '文件不能为空'];
                     try {

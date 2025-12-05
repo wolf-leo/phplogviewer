@@ -54,11 +54,11 @@ class LogViewer extends Base
         foreach ($params as $key => $param) {
             if (empty($param)) continue;
             switch ($key) {
-                case 'logviewer_module';
+                case 'logviewer_module':
                     $list = $this->getModuleLogs($params['logviewer_module']);
                     return ['code' => 1, 'data' => compact('list')];
                     break;
-                case 'logviewer_file_path';
+                case 'logviewer_file_path':
                     $file = $params['logviewer_file_path'] ?? '';
                     if (empty($file)) return ['code' => 0, 'msg' => '文件不能为空'];
                     try {
